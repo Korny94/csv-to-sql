@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSV to SQL Converter</title>
+  </head>
+  <body>
+    <h1>CSV to SQL Converter</h1>
+    <textarea
+      id="csvInput"
+      rows="10"
+      cols="100"
+      placeholder="Paste your CSV data here..."
+    ></textarea>
+    <br />
+    <button onclick="convertToSQL()">Convert to SQL</button>
+
+    <h2>SQL Output:</h2>
+    <textarea id="sqlOutput" rows="20" cols="100"></textarea>
+
+    <script>
+      function convertToSQL() {
+        const csvInput = document.getElementById("csvInput").value.trim();
+        const sqlOutput = document.getElementById("sqlOutput");
+
+        if (!csvInput) {
+          alert("Please paste your CSV data.");
+          return;
+        }
+
+        const rows = csvInput.split("\n").map((row) => row.split(","));
+        const headers = rows[0];
+        const tableName = "your_table_name"; // You can modify this or make it dynamic
+
+        // Generate CREATE TABLE statement
+        let createTableSQL = `CREATE TABLE \`${tableName}\` (\n`;
+        headers.forEach((header) => {
+          createTableSQL += `  \`${header}\` VARCHAR(1024),\n`;
+        });
+        createTableSQL = createTableSQL.slice(0, -2) + "\n);\n\n"; // Remove last comma and close the statement
+
+        // Generate INSERT INTO statements
+        let insertSQL = `INSERT INTO \`${tableName}\` VALUES\n`;
+        for (let i = 1; i < rows.length; i++) {
+          const row = rows[i].map((value) => value.trim());
+          const values = row
+            .map((value) => (value ? `'${value.replace(/'/g, "''")}'` : "NULL"))
+            .join(",");
+          insertSQL += `(${values})${i === rows.length - 1 ? ";" : ","}\n`;
+        }
+
+        sqlOutput.value = createTableSQL + insertSQL;
+      }
+    </script>
+  </body>
+</html>
